@@ -13,6 +13,7 @@ __pycache__/
 build/
 app/build/
 *.apk
+!releases/*.apk
 *.aab
 .idea/
 *.iml

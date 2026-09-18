@@ -93,6 +93,19 @@
     btnOpenAuthModal: document.getElementById('btnOpenAuthModal'),
     authActionLabel: document.getElementById('authActionLabel'),
     btnAccountSettings: document.getElementById('btnAccountSettings'),
+    btnOpenProfileModal: document.getElementById('btnOpenProfileModal'),
+    btnDeleteAccount: document.getElementById('btnDeleteAccount'),
+    profileModal: document.getElementById('profileModal'),
+    btnCloseProfileModal: document.getElementById('btnCloseProfileModal'),
+    btnCancelProfile: document.getElementById('btnCancelProfile'),
+    btnSaveProfile: document.getElementById('btnSaveProfile'),
+    btnConfirmDeleteProfile: document.getElementById('btnConfirmDeleteProfile'),
+    profileAvatarPreview: document.getElementById('profileAvatarPreview'),
+    profileDisplayNameInput: document.getElementById('profileDisplayNameInput'),
+    profileEmailInput: document.getElementById('profileEmailInput'),
+    profileRoleInput: document.getElementById('profileRoleInput'),
+    profileBioInput: document.getElementById('profileBioInput'),
+    avatarOptionsRow: document.getElementById('avatarOptionsRow'),
     btnLogout: document.getElementById('btnLogout'),
     authModal: document.getElementById('authModal'),
     btnCloseAuthModal: document.getElementById('btnCloseAuthModal'),
@@ -380,6 +393,7 @@
     },
 
     async sendOTP(destination) {
+      Guardrail.checkOtpRateLimit();
       const clean = destination.trim();
       const inputDest = document.getElementById('otpDestinationInput');
       const btnSend = document.getElementById('btnSendOtp');
@@ -455,6 +469,7 @@
     },
 
     async verifyOTP(enteredCode) {
+      Guardrail.checkOtpRateLimit();
       const btnVerify = document.getElementById('btnVerifyOtp');
       const otpRow = document.getElementById('otpInputsRow');
       if (!state.currentOtp) {
@@ -479,8 +494,11 @@
           if (boxes[0]) boxes[0].focus();
           setTimeout(() => otpRow.classList.remove('shake'), 450);
         }
+        Guardrail.recordFailedOtp();
         throw new Error('Incorrect 6-digit verification code. Please check and try again.');
       }
+
+      Guardrail.recordSuccessfulOtp();
 
       if (btnVerify) {
         btnVerify.innerHTML = '<span class="btn-spinner"></span> Verifying...';
@@ -562,6 +580,51 @@
       if (DOM.authActionLabel) DOM.authActionLabel.textContent = u.isGuest ? 'Sign In / Verify OTP' : 'Switch Account';
     },
 
+    async updateProfile({ displayName, avatar, email, role, bio }) {
+      if (!state.currentUser) return;
+      const cleanName = (displayName || '').trim() || 'User';
+      const cleanEmail = (email || '').trim() || state.currentUser.username || 'user@astra.ai';
+      const cleanAvatar = avatar || state.currentUser.avatar || '👤';
+      const cleanRole = role || state.currentUser.role || 'AI Explorer';
+      const cleanBio = (bio || '').trim();
+
+      const updatedUser = {
+        ...state.currentUser,
+        displayName: cleanName,
+        username: cleanEmail,
+        avatar: cleanAvatar,
+        role: cleanRole,
+        bio: cleanBio,
+        isGuest: false
+      };
+
+      await this.setCurrentUser(updatedUser);
+      Toast.show('Profile customized successfully!', 'success');
+      AndroidBridge.triggerHaptic('HIGH');
+    },
+
+    async deleteAccount() {
+      const confirmDelete = window.confirm('Are you sure you want to permanently delete your customized profile? This will wipe your saved profile and session tokens.');
+      if (!confirmDelete) return;
+
+      const prefix = Vault.getUserPrefix();
+      localStorage.removeItem('astra_current_user');
+      localStorage.removeItem(`astra_vault_payload_${prefix}`);
+      localStorage.removeItem(`astra_vault_salt_${prefix}`);
+      localStorage.removeItem(`astra_plain_sessions_${prefix}`);
+
+      state.currentUser = null;
+      state.vaultKey = null;
+      state.isVaultLocked = true;
+      state.sessions = [];
+      if (DOM.userDropdownMenu) DOM.userDropdownMenu.classList.add('hidden');
+      if (DOM.profileModal) DOM.profileModal.classList.add('hidden');
+
+      await this.loginAsGuest();
+      Toast.show('Profile and local data permanently deleted.', 'guardrail', 4000);
+      AndroidBridge.triggerHaptic('HIGH');
+    },
+
     async logout() {
       localStorage.removeItem('astra_current_user');
       state.currentUser = null;
@@ -627,7 +690,61 @@
       /ghp_[a-zA-Z0-9]{36}/g      // GitHub Personal Access Tokens
     ],
 
+    // Anti-Spam & Rate Limiting Tracker
+    rateLimiter: {
+      timestamps: [],
+      maxPerWindow: 5,
+      windowMs: 10000,
+      cooldownUntil: 0,
+      otpAttempts: 0,
+      otpLockedUntil: 0
+    },
+
+    checkRateLimit() {
+      const now = Date.now();
+      if (now < this.rateLimiter.cooldownUntil) {
+        const remainingSec = Math.ceil((this.rateLimiter.cooldownUntil - now) / 1000);
+        throw new Error(`Anti-Spam Shield: Request rate limit reached. Please wait ${remainingSec}s.`);
+      }
+
+      // Filter timestamps within sliding window
+      this.rateLimiter.timestamps = this.rateLimiter.timestamps.filter(t => now - t < this.rateLimiter.windowMs);
+
+      if (this.rateLimiter.timestamps.length >= this.rateLimiter.maxPerWindow) {
+        this.rateLimiter.cooldownUntil = now + 6000; // 6s cooldown penalty
+        throw new Error('Anti-Spam Shield: Too many rapid requests. 6-second cooldown active.');
+      }
+
+      this.rateLimiter.timestamps.push(now);
+    },
+
+    checkOtpRateLimit() {
+      const now = Date.now();
+      if (now < this.rateLimiter.otpLockedUntil) {
+        const remainingSec = Math.ceil((this.rateLimiter.otpLockedUntil - now) / 1000);
+        throw new Error(`Brute-Force Lockout: Too many failed OTP attempts. Locked for ${remainingSec}s.`);
+      }
+    },
+
+    recordFailedOtp() {
+      this.rateLimiter.otpAttempts++;
+      if (this.rateLimiter.otpAttempts >= 3) {
+        this.rateLimiter.otpLockedUntil = Date.now() + 60000; // 60s hard lockout
+        this.rateLimiter.otpAttempts = 0;
+        throw new Error('Brute-Force Defense: 3 incorrect attempts. Verification locked for 60 seconds.');
+      }
+    },
+
+    recordSuccessfulOtp() {
+      this.rateLimiter.otpAttempts = 0;
+      this.rateLimiter.otpLockedUntil = 0;
+    },
+
     sanitizeInput(text) {
+      if (text.length > 10000) {
+        throw new Error('Payload limit exceeded: Maximum 10,000 characters permitted per message.');
+      }
+
       if (!state.guardrailsEnabled) return { clean: text, violated: false };
 
       let isViolated = false;
@@ -1551,6 +1668,78 @@
         });
       }
 
+      // Open Profile Customization Modal
+      let selectedAvatar = '👤';
+      if (DOM.btnOpenProfileModal) {
+        DOM.btnOpenProfileModal.addEventListener('click', () => {
+          DOM.userDropdownMenu.classList.add('hidden');
+          DOM.btnUserAuth.classList.remove('active');
+          const u = state.currentUser || {};
+          if (DOM.profileDisplayNameInput) DOM.profileDisplayNameInput.value = u.displayName || 'User';
+          if (DOM.profileEmailInput) DOM.profileEmailInput.value = u.username || 'user@astra.ai';
+          if (DOM.profileRoleInput) DOM.profileRoleInput.value = u.role || 'AI Explorer';
+          if (DOM.profileBioInput) DOM.profileBioInput.value = u.bio || '';
+          
+          selectedAvatar = u.avatar || '👤';
+          if (DOM.profileAvatarPreview) DOM.profileAvatarPreview.textContent = selectedAvatar;
+          
+          document.querySelectorAll('.avatar-opt').forEach(opt => {
+            opt.classList.toggle('active', opt.getAttribute('data-avatar') === selectedAvatar);
+          });
+
+          if (DOM.profileModal) DOM.profileModal.classList.remove('hidden');
+        });
+      }
+
+      // Avatar picker buttons
+      document.querySelectorAll('.avatar-opt').forEach(opt => {
+        opt.addEventListener('click', () => {
+          document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          selectedAvatar = opt.getAttribute('data-avatar');
+          if (DOM.profileAvatarPreview) DOM.profileAvatarPreview.textContent = selectedAvatar;
+          AndroidBridge.triggerHaptic('LOW');
+        });
+      });
+
+      // Close Profile Modal
+      if (DOM.btnCloseProfileModal) {
+        DOM.btnCloseProfileModal.addEventListener('click', () => {
+          if (DOM.profileModal) DOM.profileModal.classList.add('hidden');
+        });
+      }
+      if (DOM.btnCancelProfile) {
+        DOM.btnCancelProfile.addEventListener('click', () => {
+          if (DOM.profileModal) DOM.profileModal.classList.add('hidden');
+        });
+      }
+
+      // Save Profile
+      if (DOM.btnSaveProfile) {
+        DOM.btnSaveProfile.addEventListener('click', async () => {
+          await AuthManager.updateProfile({
+            displayName: DOM.profileDisplayNameInput ? DOM.profileDisplayNameInput.value : '',
+            email: DOM.profileEmailInput ? DOM.profileEmailInput.value : '',
+            role: DOM.profileRoleInput ? DOM.profileRoleInput.value : '',
+            bio: DOM.profileBioInput ? DOM.profileBioInput.value : '',
+            avatar: selectedAvatar
+          });
+          if (DOM.profileModal) DOM.profileModal.classList.add('hidden');
+        });
+      }
+
+      // Delete Account / Profile buttons
+      if (DOM.btnDeleteAccount) {
+        DOM.btnDeleteAccount.addEventListener('click', async () => {
+          await AuthManager.deleteAccount();
+        });
+      }
+      if (DOM.btnConfirmDeleteProfile) {
+        DOM.btnConfirmDeleteProfile.addEventListener('click', async () => {
+          await AuthManager.deleteAccount();
+        });
+      }
+
       // Google Sign-In Button
       const btnGoogle = document.getElementById('btnGoogleSignIn');
       if (btnGoogle) {
@@ -1867,12 +2056,31 @@
       const rawText = DOM.userInput.value.trim();
       if (!rawText && state.attachments.length === 0) return;
 
+      // Anti-Spam Shield: Check prompt frequency
+      try {
+        Guardrail.checkRateLimit();
+      } catch (err) {
+        Toast.show(err.message, 'guardrail');
+        if (DOM.inputContainer) {
+          DOM.inputContainer.classList.add('shake');
+          setTimeout(() => DOM.inputContainer.classList.remove('shake'), 450);
+        }
+        AndroidBridge.triggerHaptic('MEDIUM');
+        return;
+      }
+
       DOM.userInput.value = '';
       DOM.userInput.style.height = 'auto';
 
       // 1. Guardrail Sanitization
-      const check = Guardrail.sanitizeInput(rawText);
-      const cleanPrompt = check.clean;
+      let cleanPrompt = rawText;
+      try {
+        const check = Guardrail.sanitizeInput(rawText);
+        cleanPrompt = check.clean;
+      } catch (err) {
+        Toast.show(err.message, 'guardrail');
+        return;
+      }
 
       const currentAttachments = [...state.attachments];
       state.attachments = [];

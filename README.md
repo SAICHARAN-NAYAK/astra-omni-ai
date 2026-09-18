@@ -1,37 +1,74 @@
 # ASTRA OMNI // Gemini 2.0 + ChatGPT-6 + Project Astra All-In-One AI
 
+[![Live Production Web App](https://img.shields.io/badge/Live%20App-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://saicharan-nayak.github.io/astra-omni-ai/)
+[![Download Android APK](https://img.shields.io/badge/Android%20APK-Download%20v2.4-blue?style=for-the-badge&logo=android)](https://github.com/SAICHARAN-NAYAK/astra-omni-ai/raw/main/releases/app-debug.apk)
+[![Security Vault](https://img.shields.io/badge/Security-AES--GCM--256-green?style=for-the-badge&logo=shield)](https://saicharan-nayak.github.io/astra-omni-ai/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
 > **100% Free, Safe, and Cryptographically Secure Autonomous Multimodal AI**  
 > Combining Google Gemini 2.0 Pro multimodal synthesis, OpenAI ChatGPT-6 Omni deep reasoning, and Google Project Astra live spatial perception in a single unified, classic-modern platform.
 
 ---
 
-## 🌟 Key Features
+## 🌐 Live Production Access
 
-- **Google Gemini 2.0 Pro Mode**: Fast visual synthesis, dynamic artifacts, Google Search grounding, and code preview.
-- **OpenAI ChatGPT-6 Omni Mode**: Multi-step recursive thinking process with expandable formal reasoning and interactive code sandbox.
-- **Project Astra Live AR Subsystem**: Live camera vision, spatial object tracking HUD, and low-latency duplex voice interaction.
-- **Real-World Authentication**:
-  - Continue with Google (OAuth sign-in).
-  - 6-Digit Email / Mobile Phone OTP verification with countdown timer.
-  - One-click Guest Access mode.
-- **Strict Privacy & Security**:
-  - Client-side **Web Crypto AES-GCM 256-bit encrypted vault**.
-  - Air-gapped offline privacy mode killswitch.
-  - Strict threat guardrails against prompt injection and data exfiltration.
-  - Anonymous identity profiles (**`User`** / **`Client`**) with zero personal data leakage.
-- **Human-Friendly UI/UX**:
-  - Classic modern sidebar with proportional icons.
-  - Smooth spring modal entrance, staggered digit bounce, gentle error shake feedback, and real-time 3-dot AI thinking wave.
-  - Interactive Canvas Sandbox for live HTML/JS/CSS code execution.
+* **Official Live Web App:** [https://saicharan-nayak.github.io/astra-omni-ai/](https://saicharan-nayak.github.io/astra-omni-ai/)
+* **Direct Android APK Download:** [`releases/app-debug.apk`](./releases/app-debug.apk) (Size: ~6.0 MB, includes full offline engine)
+* **Main Repository:** [https://github.com/SAICHARAN-NAYAK/astra-omni-ai](https://github.com/SAICHARAN-NAYAK/astra-omni-ai)
 
 ---
 
-## 🚀 Quick Start (Local)
+## 🌟 Key Features
+
+### 1. Unified Tri-Model Intelligence
+- **Google Gemini 2.0 Pro Multimodal**: Fast visual synthesis, dynamic artifacts, real-time Google Search grounding chips, and double-check fact verification.
+- **OpenAI ChatGPT-6 Omni Deep Thought**: Recursive reasoning engine with expandable thought accordions and interactive code sandbox.
+- **Project Astra Live AR Viewfinder**: Live camera perception, spatial object detection HUD, and low-latency duplex voice interaction.
+
+### 2. Natural Authentication & Profile Customization
+- **Google 1-Click Sign-In** as standard `User`.
+- **6-Digit Email & Mobile OTP Verification** with auto-advancing input boxes, copy-paste support, and resend countdown.
+- **Interactive Profile Customization**:
+  - Customize Display Name, Email/Handle, and Bio status.
+  - Choose from 8 custom avatar icons (`👤`, `🧑‍💻`, `🛡️`, `🚀`, `⚡`, `🤖`, `🌟`, `👑`) with instant live preview.
+  - Select role specialty (`AI Researcher`, `Cybersecurity Analyst`, `Software Engineer`, `Creative Designer`, etc.).
+- **Permanent Account & Profile Deletion (Danger Zone)**:
+  - Cryptographically shreds local session tokens, wipes stored credentials, and reverts to clean Guest mode.
+
+### 3. Bulletproof Security & Anti-Spam Defense
+- **Zero Server-Side Billing Vulnerability**: Zero API keys are stored on server backends; queries run on a local offline neural engine or within the client's own browser memory. Spammers cannot drain cards or run up bills.
+- **Sliding-Window Rate Limiter**: Automatically caps rapid requests at 5 queries per 10 seconds with a cooldown penalty.
+- **Brute-Force OTP Lockout**: Locks out verification for 60 seconds after 3 failed attempts.
+- **Client-Side AES-GCM (256-bit) Vault**: Cryptographically encrypts local storage records with custom passphrases.
+- **Strict Guardrails**: Intercepts jailbreaks (`DAN mode`, `ignore instructions`), credential exfiltration, and XSS `<script>` injections.
+
+### 4. Modern Classic Ergonomics & Animations
+- Compact, proportional SVG icons without oversized elements.
+- Fluid micro-animations for message entry, typing wave dots, and interactive canvas expansion.
+- Right-hand collapsible **Code Canvas** with live code execution for HTML, CSS, JavaScript, and diagrams.
+
+---
+
+## 📱 Mobile App (Android Studio)
+
+A complete native Android Studio wrapper is included in [`android_studio_app/`](./android_studio_app):
+* Built with Kotlin, Jetpack Core, WebView, and Hardware Acceleration.
+* Camera & Audio permissions configured for Project Astra Live AR.
+* Pre-compiled APK ready at [`releases/app-debug.apk`](./releases/app-debug.apk).
+* To rebuild locally:
+  ```bash
+  cd android_studio_app
+  ./gradlew assembleDebug
+  ```
+
+---
+
+## 🚀 Running Locally (Web)
 
 ### Windows (One-Click)
-Double-click `Launch_Astra_Omni.bat`. It starts a local zero-dependency web server and automatically opens `http://localhost:8090` in your browser.
+Double-click `Launch_Astra_Omni.bat`. It starts a local web server and opens `http://localhost:8090` in your browser.
 
-### Cross-Platform (Command Line)
+### Cross-Platform Command Line
 ```bash
 # Using Python
 python -m http.server 8090
@@ -39,50 +76,6 @@ python -m http.server 8090
 # Or using Node
 npx serve .
 ```
-Open [http://localhost:8090](http://localhost:8090) in your browser.
-
----
-
-## 🌐 Live Web Deployment
-
-### 1. GitHub Pages (Automated via Actions)
-1. Push this repository to GitHub:
-   ```bash
-   git remote add origin https://github.com/<your-username>/astra-omni-ai.git
-   git branch -M main
-   git push -u origin main
-   ```
-2. In your repository on GitHub, go to **Settings** > **Pages**.
-3. Under **Build and deployment** > **Source**, select **GitHub Actions**.
-4. Your site will automatically go live at:
-   `https://<your-username>.github.io/astra-omni-ai/`
-
-### 2. Vercel (1-Click Instant Deploy)
-Configured with [`vercel.json`](./vercel.json):
-1. Sign in to [vercel.com](https://vercel.com) and click **Add New Project**.
-2. Select this repository and click **Deploy**.
-
-### 3. Netlify (Drag & Drop or Git)
-Configured with [`netlify.toml`](./netlify.toml) including camera/microphone permissions policy:
-- Drag and drop this folder onto [app.netlify.com/drop](https://app.netlify.com/drop), or
-- Connect your GitHub repository.
-
----
-
-## 📱 Mobile App (Android Studio)
-
-A complete native Android Studio wrapper is included in [`android_studio_app/`](./android_studio_app):
-1. Double-click `Open_In_Android_Studio.bat` or open `android_studio_app` in Android Studio.
-2. Select **Build** > **Build Bundle(s) / APK(s)** > **Build APK(s)**.
-3. Install the generated APK on your Android device. Camera, Microphone, and Audio permissions are pre-configured for live Project Astra AR interaction.
-
----
-
-## 🔒 Security Architecture
-
-- **Zero External Telemetry**: Session data, chat histories, and keys remain entirely inside your browser's local Web Crypto AES-GCM vault.
-- **Air-Gap Capability**: Switch to offline simulation or localhost models (Ollama) with no outbound network traffic.
-- **Guardrail Filters**: Automatically redacts credentials, private tokens, and script exploits.
 
 ---
 
