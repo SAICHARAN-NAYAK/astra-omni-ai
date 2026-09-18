@@ -1,0 +1,25 @@
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Android Studio / Gradle
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+.idea/
+*.iml
+local.properties
+.cxx/
+
+# Node / Logs
+node_modules/
+npm-debug.log*
+*.log
