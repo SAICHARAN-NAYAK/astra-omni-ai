@@ -1,5 +1,5 @@
-# Proguard rules for CYBERSHIELD Android App
--keepclassmembers class com.cybershield.threatengine.WebAppInterface {
+# Proguard rules for ASTRA OMNI Android App
+-keepclassmembers class com.astra.omni.WebAppInterface {
     <methods>;
 }
 -keepattributes JavascriptInterface

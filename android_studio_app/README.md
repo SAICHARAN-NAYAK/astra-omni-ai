@@ -1,16 +1,15 @@
-# CYBERSHIELD Android App // HTML WebView Edition
+# ASTRA OMNI AI Android App // Native Hybrid Edition
 
-Native Android Studio application for the **CYBERSHIELD Unidirectional IP Cyber Threat Detection Enclave**.
+Native Android Studio application for **ASTRA OMNI AI** (Gemini 2.0 Pro + ChatGPT-6 Omni + Project Astra Live AR).
 
 ---
 
 ## How to Open in Android Studio
 
-1. Double-click [`Open_In_Android_Studio.bat`](../Open_In_Android_Studio.bat) in the repository root.
-   - Or open **Android Studio**, click **File** &rarr; **Open**, and choose this folder:
-     `C:\Users\saich\.gemini\antigravity-ide\scratch\unidirectional-threat-engine\android_studio_app`
+1. Open **Android Studio**, click **File** &rarr; **Open**, and select this folder:
+   `.../astra-omni-ai/android_studio_app`
 2. Allow Android Studio to sync Gradle dependencies.
-3. Select your device or emulator (e.g. `Pixel_10_Pro`) from the device dropdown.
+3. Select your device or emulator from the device dropdown.
 4. Click **Run** (or press `Shift + F10`).
 
 ---
@@ -20,38 +19,41 @@ Native Android Studio application for the **CYBERSHIELD Unidirectional IP Cyber 
 ```
 android_studio_app/
 ├── build.gradle.kts                 # Root project build configuration
-├── settings.gradle.kts               # Gradle settings
+├── settings.gradle.kts               # Gradle settings (AstraOmniAI)
 ├── local.properties                 # Points to local Android SDK
 ├── app/
-│   ├── build.gradle.kts             # App dependencies (WebKit, Material, SwipeRefresh)
+│   ├── build.gradle.kts             # App dependencies (com.astra.omni, WebKit, Material)
 │   └── src/main/
-│       ├── AndroidManifest.xml      # Permissions: INTERNET, ACCESS_NETWORK_STATE, VIBRATE
-│       ├── java/com/cybershield/threatengine/
+│       ├── AndroidManifest.xml      # Camera, Record Audio, Internet, Haptic permissions
+│       ├── java/com/astra/omni/
 │       │   ├── MainActivity.kt      # Hardware-accelerated WebView & back navigation
-│       │   └── WebAppInterface.kt   # JavaScriptInterface bridge (haptics, toasts, telemetry)
-│       ├── assets/                  # Bundled HTML/CSS/JS web application
-│       │   ├── index.html           # Responsive mobile SOC interface
-│       │   ├── styles.css           # Dark enterprise cybersecurity palette
-│       │   └── app.js               # Client controller with dual online/offline engine
-│       └── res/                     # Android layouts, colors, themes, adaptive icons
+│       │   └── WebAppInterface.kt   # Native AndroidBridge (haptics, toasts, device info)
+│       ├── assets/                  # Bundled Astra Omni AI web application
+│       │   ├── index.html           # Gemini, ChatGPT-6, and Project Astra UI
+│       │   ├── styles.css           # Modern classic design system
+│       │   └── app.js               # Client controller with local neural simulation & vault
+│       └── res/                     # Android layouts, colors, Theme.AstraOmni, icons
 ```
 
 ---
 
 ## Key Features
 
-1. **Native HTML WebView Architecture**:
-   - Bundles the complete CYBERSHIELD frontend into `app/src/main/assets/`.
-   - Full hardware acceleration, DOM storage, and responsive touch gestures.
+1. **Hardware-Accelerated Multimodal Core**:
+   - Bundles the complete ASTRA OMNI frontend into `app/src/main/assets/`.
+   - Native WebKit configuration with camera & microphone permission bridges for Project Astra Live AR viewfinder.
 
-2. **Dual Online / Offline Mode**:
-   - **Online Mode**: Connects to the local threat engine (`http://10.0.2.2:8080` from emulator) or public tunnel (`https://lower-watts-new-mistakes.trycloudflare.com`).
-   - **Air-Gapped Standalone Simulation**: If no server is reachable, the app automatically runs an internal simulation engine so you can test and demonstrate all 6 tabs with zero dependencies.
+2. **Autonomous Offline AI Engine**:
+   - Operates 100% locally with zero external network requirements.
+   - Built-in Autonomous Neural Engine computes prompt responses directly in the local runtime.
 
-3. **Android Native Bridge (`WebAppInterface`)**:
-   - `AndroidBridge.showToast(message)`: Displays native Android system toasts.
-   - `AndroidBridge.triggerHaptic(severity)`: Triggers physical device haptic vibrations on critical and high threat alerts.
-   - `AndroidBridge.getDeviceTelemetry()`: Passes battery, network type, and hardware model to the interface.
+3. **Native Bridge (`AndroidBridge`)**:
+   - `AndroidBridge.showToast(message)`: Native Android system toasts.
+   - `AndroidBridge.triggerHaptic(severity)`: Physical device haptic vibrations on model switches, OTP verification, and actions.
+   - `AndroidBridge.getDeviceInfo()`: Hardware telemetry and network connection state.
 
-4. **Endpoint Switcher**:
-   - Tap the **OPTICAL RX ONLY (⚙️)** badge in the top bar to switch between Emulator (`10.0.2.2:8080`), Public Tunnel, or Offline Simulation.
+4. **Building APK from CLI**:
+   ```bash
+   ./gradlew assembleDebug
+   ```
+   Output APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.

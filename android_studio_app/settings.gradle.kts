@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CybershieldThreatEnclave"
+rootProject.name = "AstraOmniAI"
 include(":app")

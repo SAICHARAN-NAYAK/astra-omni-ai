@@ -1,4 +1,4 @@
-package com.cybershield.threatengine
+package com.astra.omni
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -22,8 +22,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 /**
- * CYBERSHIELD // Enterprise Security Operations Platform
- * Android Native Container with hardware-accelerated WebView hosting HTML5/JS core.
+ * ASTRA OMNI AI // Unified Autonomous Multimodal AI Engine
+ * Native Android Container with hardware-accelerated WebView hosting HTML5/JS core.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -43,58 +43,51 @@ class MainActivity : AppCompatActivity() {
         configureWebView()
         setupSwipeRefresh()
         setupBackNavigation()
-        requestHardwarePermissions()
+        requestAppPermissions()
 
-        // Load local bundled HTML asset
-        webView.loadUrl("file:///android_asset/index.html")
+        loadApplication()
     }
 
-    private fun requestHardwarePermissions() {
+    private fun requestAppPermissions() {
         val permissions = arrayOf(
             Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS
         )
-        val needed = permissions.filter {
+        val missingPermissions = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-        if (needed.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, needed.toTypedArray(), 101)
+        if (missingPermissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), 101)
         }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureWebView() {
-        val settings: WebSettings = webView.settings
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            databaseEnabled = true
+            allowFileAccess = true
+            allowContentAccess = true
+            mediaPlaybackRequiresUserGesture = false
 
-        // JavaScript & DOM Storage
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.databaseEnabled = true
+            // Performance optimizations
+            cacheMode = WebSettings.LOAD_DEFAULT
+            setRenderPriority(WebSettings.RenderPriority.HIGH)
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            builtInZoomControls = false
+            displayZoomControls = false
 
-        // Hardware rendering & Viewport
-        settings.useWideViewPort = true
-        settings.loadWithOverviewMode = true
-        settings.builtInZoomControls = false
-        settings.displayZoomControls = false
+            // Local resource access
+            allowFileAccessFromFileURLs = true
+            allowUniversalAccessFromFileURLs = true
+        }
 
-        // File & Content access for assets
-        settings.allowFileAccess = true
-        settings.allowContentAccess = true
+        // Expose native Android bridge to JS
+        webView.addJavascriptInterface(WebAppInterface(this), "AndroidBridge")
 
-        // Allow mixed content for local development and websockets
-        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-
-        // Cache policy
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
-
-        // Enable media playback without gesture for voice synthesis & stream
-        settings.mediaPlaybackRequiresUserGesture = false
-
-        // Injected Native JavaScript Bridge
-        val webAppInterface = WebAppInterface(this)
-        webView.addJavascriptInterface(webAppInterface, "AndroidBridge")
-
-        // Custom WebViewClient
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
@@ -113,32 +106,34 @@ class MainActivity : AppCompatActivity() {
                 error: WebResourceError?
             ) {
                 super.onReceivedError(view, request, error)
-                // Ignore asset errors, let internal fallback handle
+                // Fall back to bundled offline assets if remote fails
+                if (request?.isForMainFrame == true) {
+                    webView.loadUrl("file:///android_asset/index.html")
+                }
             }
         }
 
-        // WebChromeClient for progress bar and console logs
         webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 progressBar.progress = newProgress
-                if (newProgress >= 100) {
+                if (newProgress == 100) {
                     progressBar.visibility = View.GONE
-                } else {
-                    progressBar.visibility = View.VISIBLE
                 }
             }
 
-            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                return super.onConsoleMessage(consoleMessage)
-            }
-
-            // Project Astra Live Camera & Mic Access
             override fun onPermissionRequest(request: PermissionRequest?) {
                 runOnUiThread {
                     request?.grant(request.resources)
                 }
             }
+
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                return true
+            }
         }
+
+        // Hardware acceleration
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
     }
 
     private fun setupSwipeRefresh() {
@@ -165,14 +160,26 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun loadApplication() {
+        val customUrl = getSharedPreferences("astra_omni_prefs", MODE_PRIVATE)
+            .getString("custom_server_url", null)
+
+        if (!customUrl.isNullOrBlank()) {
+            webView.loadUrl(customUrl)
+        } else {
+            // Load high-performance bundled offline HTML5/JS app directly
+            webView.loadUrl("file:///android_asset/index.html")
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         webView.onResume()
     }
 
     override fun onPause() {
-        super.onPause()
         webView.onPause()
+        super.onPause()
     }
 
     override fun onDestroy() {
