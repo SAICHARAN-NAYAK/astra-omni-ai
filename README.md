@@ -14,6 +14,8 @@
 
 * **Official Live Web App:** [https://saicharan-nayak.github.io/astra-omni-ai/](https://saicharan-nayak.github.io/astra-omni-ai/)
 * **Direct Android APK Download:** [`releases/app-debug.apk`](./releases/app-debug.apk) (Size: ~6.0 MB, includes full offline engine)
+* **Google Play App Bundle (.aab):** [`releases/app-release.aab`](./releases/app-release.aab) (Size: ~4.2 MB, ready for Play Console)
+* **Privacy Policy (Google Play Compliant):** [https://saicharan-nayak.github.io/astra-omni-ai/privacy-policy.html](https://saicharan-nayak.github.io/astra-omni-ai/privacy-policy.html)
 * **Main Repository:** [https://github.com/SAICHARAN-NAYAK/astra-omni-ai](https://github.com/SAICHARAN-NAYAK/astra-omni-ai)
 
 ---

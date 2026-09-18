@@ -15,6 +15,7 @@ app/build/
 *.apk
 !releases/*.apk
 *.aab
+!releases/*.aab
 .idea/
 *.iml
 local.properties
